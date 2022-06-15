@@ -1,0 +1,14 @@
+query getComments($entityType : [String!] , $entityId : [ID!]){
+    comments(entityType:$entityType , entityId:$entityId){
+        edges{
+            node{
+                id
+                entityType
+                entityId
+                text
+                createdOn
+                updatedOn
+            }
+        }
+    }
+}

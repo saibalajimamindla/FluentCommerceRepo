@@ -1,0 +1,5 @@
+mutation CreateCarrierConsignment($input: CreateCarrierConsignmentInput) {
+    createCarrierConsignment(input: $input) {
+        id
+    }
+}

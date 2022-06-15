@@ -1,0 +1,14 @@
+query GetStandardProductByRef($productRef: String!, $catalogueRef: String!) {
+    standardProduct(ref: $productRef, catalogue: {ref: $catalogueRef}) {
+        ref
+        type
+        gtin
+        name
+        status
+        attributes {
+            name
+            type
+            value
+        }
+    }
+}

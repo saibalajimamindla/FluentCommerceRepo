@@ -1,0 +1,5 @@
+mutation UpdateWave($input: UpdateWaveInput) {
+    updateWave(input: $input) {
+        id
+    }
+}

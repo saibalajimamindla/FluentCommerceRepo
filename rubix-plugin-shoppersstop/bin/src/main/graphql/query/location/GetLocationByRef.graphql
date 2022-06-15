@@ -1,0 +1,84 @@
+query GetLocationByRef(
+  $ref: String!
+  $includePrimaryAddress: Boolean!,
+  $includeAttributes : Boolean!,
+  $includeOpeningSchedule : Boolean!,
+  $includeRetailer : Boolean!,
+  $includeNetworks : Boolean!,
+  $includeStorageAreas : Boolean!
+) {
+  location(ref: $ref) {
+    ref
+    id
+    type
+    status
+    name
+    supportPhoneNumber
+    defaultCarrier
+    defaultCarrierName
+    primaryAddress @include(if: $includePrimaryAddress) {
+      id
+      ref
+      type
+      companyName
+      name
+      street
+      city
+      state
+      postcode
+      region
+      country
+      latitude
+      longitude
+      timeZone
+    }
+    attributes @include(if: $includeAttributes) {
+      type
+      name
+      value
+    }
+    openingSchedule @include(if: $includeOpeningSchedule) {
+      id
+      createdOn
+      updatedOn
+      allHours
+      monEnd
+      monStart
+      tueEnd
+      tueStart
+      wedEnd
+      wedStart
+      thuEnd
+      thuStart
+      friEnd
+      friStart
+      satEnd
+      satStart
+      sunEnd
+      sunStart
+    }
+    retailer @include(if: $includeRetailer){
+      id
+      ref
+    }
+    networks @include(if: $includeNetworks){
+      networkEdge : edges{
+        networkNode : node{
+          id
+          ref
+          status
+        }
+      }
+    }
+    storageAreas @include(if: $includeStorageAreas){
+      storageEdge : edges{
+       storageNode :  node{
+          id
+          status
+          type
+        }
+      }
+    }
+
+  }
+}

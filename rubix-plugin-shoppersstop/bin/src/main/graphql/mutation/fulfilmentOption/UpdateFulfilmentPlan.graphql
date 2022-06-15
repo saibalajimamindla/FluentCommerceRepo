@@ -1,0 +1,22 @@
+mutation UpdateFulfilmentPlan($input: UpdateFulfilmentPlanInput) {
+    updateFulfilmentPlan(input: $input) {
+        id
+        ref
+        status
+        eta
+        attributes {
+            type
+            name
+            value
+        }
+        exceptions {
+            code
+            message
+            attributes {
+                type
+                name
+                value
+            }
+        }
+    }
+}

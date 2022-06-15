@@ -1,0 +1,62 @@
+
+query GetConsignmentById($id: ID!, $includeArticles: Boolean!, $articlesCount: Int, $articlesCursor: String, $includeFulfilments: Boolean!, $fulfilmentCount: Int, $fulfilmentCursor: String) {
+    consignmentById(id: $id) {
+        id
+        ref
+        status
+        consignmentReference
+        trackingLabel
+        labelUrl
+        orderSummaryUrl
+        consignmentArticles(first: $articlesCount, after: $articlesCursor) @include(if: $includeArticles) {
+            articleEdge:edges {
+                articleNode:node {
+                    article {
+                        id
+                        ref
+                        type
+                        status
+                        attributes {
+                            name
+                            type
+                            value
+                        }
+                        description
+                        height
+                        length
+                        name
+                        weight
+                        width
+                        quantity
+                        fulfilments (first: $fulfilmentCount, after: $fulfilmentCursor) @include(if: $includeFulfilments){
+                            fulfilmentEdge:edges {
+                                fulfilment:node {
+                                    id
+                                    ref
+                                    status
+                                    attributes {
+                                        name
+                                        type
+                                        value
+                                    }
+                                    deliveryType
+                                    type
+                                    eta
+                                    expiryTime
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        carrier {
+            id
+            name
+        }
+        retailer {
+            id
+            ref
+        }
+    }
+}

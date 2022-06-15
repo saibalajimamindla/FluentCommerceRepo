@@ -1,0 +1,40 @@
+query GetLocationById($id: ID!) {
+    locationById(id: $id) {
+        id
+        ref
+        type
+        status
+        attributes {
+            name
+            type
+            value
+        }
+        name
+        supportPhoneNumber
+        defaultCarrier
+        defaultCarrierName
+        primaryAddress {
+            id
+            type
+            companyName
+            name
+            street
+            city
+            state
+            postcode
+            region
+            country
+            latitude
+            longitude
+            longitude
+            ref
+            timeZone
+        }
+        retailer {
+            id
+            status
+            ref
+            summary
+        }
+    }
+}

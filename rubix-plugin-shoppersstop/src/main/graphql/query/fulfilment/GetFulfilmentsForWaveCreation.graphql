@@ -1,0 +1,19 @@
+query GetFulfilmentsForWaveCreation($status: [String], $fromLocation: LocationLinkInput, $fulfilmentsCount: Int, $fulfilmentsCursor: String) {
+    fulfilments(status: $status, fromLocation: $fromLocation, first: $fulfilmentsCount, after: $fulfilmentsCursor) {
+        pageInfo {
+            hasNextPage
+        }
+        edges {
+            cursor
+            node {
+                id
+                ref
+                status
+                createdOn
+                updatedOn
+                eta
+                expiryTime
+            }
+        }
+    }
+}

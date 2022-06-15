@@ -1,0 +1,6 @@
+mutation UpdateConsignment($input: UpdateConsignmentInput) {
+    updateConsignment(input: $input) {
+        id
+        status
+    }
+}

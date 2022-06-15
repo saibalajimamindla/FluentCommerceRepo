@@ -1,0 +1,36 @@
+query SearchVirtualInventory($virtualCatalogue: VirtualCatalogueKey!, $productQuantities: [ProductQuantityInput!]!, $excludedLocationRefs: [String!], $orderByProximity: GeoCoordinateInput, $count: Int) {
+    searchVirtualInventory(virtualCatalogue: $virtualCatalogue, productQuantities: $productQuantities, excludedLocationRefs: $excludedLocationRefs, orderByProximity: $orderByProximity, first: $count) {
+        edges {
+            node {
+                location {
+                    type
+                    id
+                    ref
+                    networks {
+                        edges {
+                            node {
+                                ref
+                            }
+                        }
+                    }
+                    primaryAddress {
+                        street
+                        city
+                        state
+                        postcode
+                        country
+                        latitude
+                        longitude
+                    }
+                }
+                virtualPositions {
+                    status
+                    ref
+                    productRef
+                    quantity
+                    groupRef
+                }
+            }
+        }
+    }
+}

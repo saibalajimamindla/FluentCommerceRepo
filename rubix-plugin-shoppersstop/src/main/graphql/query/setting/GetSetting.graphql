@@ -1,0 +1,15 @@
+query GetSetting($name: [String], $context: [String!], $contextId: [Int!]) {
+	settings(name: $name, context: $context, contextId: $contextId) {
+		settingEdge: edges {
+			settingNode: node {
+				id
+				name
+				value
+				valueType
+				lobValue
+				context
+				contextId
+			}
+		}
+	}
+}

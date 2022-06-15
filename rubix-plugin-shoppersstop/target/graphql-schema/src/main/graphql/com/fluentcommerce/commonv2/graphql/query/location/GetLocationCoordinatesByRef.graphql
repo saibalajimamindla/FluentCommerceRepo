@@ -1,0 +1,12 @@
+query GetLocationCoordinatesRef($ref: String!) {
+    location(ref: $ref) {
+        id
+        ref
+        status
+        primaryAddress {
+            ref
+            latitude
+            longitude
+        }
+    }
+}

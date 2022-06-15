@@ -1,0 +1,5 @@
+mutation createLocationUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+        id
+    }
+}

@@ -1,0 +1,46 @@
+query GetFulfilmentsDetailsByOrderId($id: ID!, $fulfilmentItemCount: Int, $fulfilmentItemCursor: String, $fulfilmentCount: Int, $fulfilmentCursor: String) {
+    orderById(id: $id) {
+        id
+        ref
+        type
+        status
+        fulfilments(first: $fulfilmentCount, after: $fulfilmentCursor) {
+            edges {
+                node {
+                    id
+                    status
+                    type
+                    ref
+                    items(first: $fulfilmentItemCount, after: $fulfilmentItemCursor) {
+                        edges {
+                            node {
+                                id
+                                ref
+                                filledQuantity
+                                requestedQuantity
+                                filledQuantity
+                                rejectedQuantity
+                                status
+                                orderItem {
+                                    paidPrice
+                                    currency
+                                    taxPrice
+                                    totalPrice
+                                    totalTaxPrice
+                                }
+                            }
+                            cursor
+                        }
+                        pageInfo {
+                            hasNextPage
+                        }
+                    }
+                }
+                cursor
+            }
+            pageInfo {
+                hasNextPage
+            }
+        }
+    }
+}

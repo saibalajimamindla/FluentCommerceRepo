@@ -1,0 +1,1638 @@
+{
+    "retailerId": "3",
+    "version": "1.41",
+    "entityType": "ORDER",
+    "entitySubtype": "HD",
+    "description": "Default HD Workflow",
+    "versionComment": "Initial version",
+    "createdBy": "shoppersstop ",
+    "createdOn": "2022-06-11T05:49:23.499+0000",
+    "id": null,
+    "name": "ORDER::HD",
+    "rulesets": [
+        {
+            "name": "CREATE",
+            "description": "CREATE & Validate order's delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "RECEIVED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "CheckOrderCoordinates"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CheckOrderCoordinates",
+            "description": "CREATE & Validate order's delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfOrderCoordinatesPresent",
+                    "props": {
+                        "eventName": "ProcessOrder"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfOrderCoordinatesNotPresent",
+                    "props": {
+                        "eventName": "CheckOrderDeliveryAddress"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CheckOrderDeliveryAddress",
+            "description": "CREATE & Validate order's delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfDeliveryAddressPresent",
+                    "props": {
+                        "eventName": "ResolveOrderCoordinates"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfDeliveryAddressNotPresent",
+                    "props": {
+                        "eventName": "ProcessError"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ResolveOrderCoordinates",
+            "description": "CREATE & Validate order's delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ResolveOrderCoordinates",
+                    "props": {
+                        "validAddress": "UpdateOrderCoordinates",
+                        "invalidAddress": "ProcessError"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "UpdateOrderCoordinates",
+            "description": "CREATE & Validate order's delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.UpdateOrderCoordinates",
+                    "props": {}
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "ProcessOrder"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ProcessOrder",
+            "description": "Process the Order with a valid delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "BOOKED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "FindAndCreateOrderFulfilment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ProcessError",
+            "description": "Process Order with invalid delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "ESCALATED"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "FindAndCreateOrderFulfilment",
+            "description": "Process the Order with a valid delivery address",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.ForwardEventWithDeliveryAddressCoordinates",
+                    "props": {
+                        "eventName": "SendEventOnIdentifyingDeliveryType"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "SendEventOnIdentifyingDeliveryType",
+            "description": "identifies the delivery type and sends event to respective one",
+            "type": "ORDER",
+            "subtype": "HD",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.SendEventOnIdentifyingDeliveryType",
+                    "props": {
+                        "expressDeliveryEvent": "GetLocationsForNetworkED",
+                        "expressDeliveryValue": "ED",
+                        "standardDeliveryEvent": "GetLocationsForNetworkSD",
+                        "standardDeliveryValue": "SD"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "GetLocationsForNetworkSD",
+            "description": "Performs the 'ALL' inventory search against the SD virtual catalogue and sends the resulting proposed fulfilments as part of the response event.",
+            "type": "ORDER",
+            "subtype": "HD",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.GetLocationsForNetwork",
+                    "props": {
+                        "eventName": "FilterLocationsByType",
+                        "networkRef": "SSBEAUTY_SD",
+                        "locationStatuses": [
+                            "ACTIVE"
+                        ]
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "GetLocationsForNetworkED",
+            "description": "Performs the 'ALL' inventory search against the ED virtual catalogue and sends the resulting proposed fulfilments as part of the response event.",
+            "type": "ORDER",
+            "subtype": "HD",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.GetLocationsForNetwork",
+                    "props": {
+                        "eventName": "CalculateLocationsDistances",
+                        "networkRef": "SSBEAUTY_ED",
+                        "locationStatuses": [
+                            "ACTIVE"
+                        ]
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "SearchInventoryAtLocationsSD",
+            "description": "Performs an SD inventory search against the virtual catalogue , filters the stores out and sends the resulting proposed fulfilments as part of the response event.",
+            "type": "ORDER",
+            "subtype": "HD",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.SearchInventoryAtLocationsSD",
+                    "props": {
+                        "virtualCatalogueRef": "BASE:3",
+                        "responseEventIfVirtualPositionsExists": "SelectProposedFulfilment",
+                        "responseEventIfVirtualPositionsNotExists": "CalculateLocationsDistances"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CalculateLocationsDistances",
+            "description": "Performs the 'ALL' inventory search against the virtual catalogue and sends the resulting proposed fulfilments as part of the response event.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.CalculateLocationsDistances",
+                    "props": {
+                        "eventName": "SearchInventoryAtLocations"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "SearchInventoryAtLocations",
+            "description": "Performs an inventory search against the virtual catalogue and sends the resulting proposed fulfilments as part of the response event.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SearchInventoryAtLocations",
+                    "props": {
+                        "eventName": "SelectProposedFulfilment",
+                        "virtualCatalogueRef": "BASE:3"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "SelectProposedFulfilment",
+            "description": "Performs an inventory search against the virtual catalogue and sends the resulting proposed fulfilments as part of the response event.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SelectProposedFulfilment",
+                    "props": {
+                        "eventName": "CheckProposedFulfilmentExists",
+                        "excludedFulfilmentStatuses": [
+                            "CANCELLED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ]
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CheckProposedFulfilmentExists",
+            "description": "Checks if a proposed fulfilment exists.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfProposedFulfilmentNotPresent",
+                    "props": {
+                        "eventName": "CreateRejectedFulfilment"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfProposedFulfilmentPresent",
+                    "props": {
+                        "eventName": "CheckMaxSplitLimitReached"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CheckMaxSplitLimitReached",
+            "description": "Checks if a proposed fulfilment exists.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfMaxSplitLimitReached",
+                    "props": {
+                        "eventName": "CreateRejectedFulfilment",
+                        "maxSplitLimit": 5,
+                        "excludedFulfilmentStatuses": [
+                            "CANCELLED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ]
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfMaxSplitLimitNotReached",
+                    "props": {
+                        "eventName": "CreateFulfilment",
+                        "maxSplitLimit": 5,
+                        "excludedFulfilmentStatuses": [
+                            "CANCELLED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ]
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CreateFulfilment",
+            "description": "Filters incoming proposed fulfilments from 'FindAndCreatePartialFulfilment' and creates a fulfilment. If no fulfilment can be created 'CreateRejectedFulfilment' is triggered.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.CreateFulfilment",
+                    "props": {
+                        "excludedFulfilmentStatuses": [
+                            "CANCELLED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ]
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.ForwardIfUnfulfilledItemsExist",
+                    "props": {
+                        "eventName": "FindAndCreateOrderFulfilment",
+                        "excludedFulfilmentStatuses": [
+                            "CANCELLED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ]
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CreateRejectedFulfilment",
+            "description": "Creates a 'system rejected' fulfilment for items where no inventory could be found.",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commongi.CreateFulfilmentForUnfulfillableItems",
+                    "props": {
+                        "acceptedStatuses": [
+                            "CREATED",
+                            "PROCESSING",
+                            "ASSIGNED",
+                            "AWAITING_WAVE",
+                            "PARTIALLY_FULFILLED",
+                            "FULFILLED",
+                            "AWAITING_COURIER_COLLECTION",
+                            "REJECTED",
+                            "COMPLETE"
+                        ],
+                        "rejectedStatuses": [
+                            "CANCELLED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ],
+                        "systemRejectedLocationRef": "REJCTLOC"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CREATE",
+            "description": "Fulfilment entity creation which will change the status to depending on fulfillable quantities and notify the inventory catalogue to reserve stock. The fulfilment type is identified and set as an attribute.",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "PROCESSING"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.AddFulfilmentTypeAttributeToFulfilment",
+                    "props": null
+                },
+                {
+                    "name": "SSTOPDEV.commongi.SendEventToUpdateInventoryQuantity",
+                    "props": {
+                        "eventName": "UpdateInventoryQty",
+                        "operation": "RESERVE",
+                        "retailerId": "3",
+                        "inventoryCatalogueRef": "DEFAULT:3"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventToFulfilmentOnVerifyingOrderStatus",
+                    "props": {
+                        "eventName": "ProcessFulfilment",
+                        "orderStatus": [
+                            "BOOKED",
+                            "PICK_PACK"
+                        ]
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ProcessFulfilment",
+            "description": "Identifies the fulfilment type based on the attribute and sends the corresponding event.",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commongi.ChangeStateForUnfulfilableFulfilment",
+                    "props": {
+                        "status": "ESCALATED",
+                        "systemRejectedLocationRef": "REJCTLOC"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "ProcessEscalatedFulfilment"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingAttributeValue",
+                    "props": {
+                        "eventName": "StoreFulfilment",
+                        "attributeName": "FulfilmentType",
+                        "attributeValue": "HD_PFS"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PROCESSING"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ProcessEscalatedFulfilment",
+            "description": "Process fulfilments which have been escalated and could not be fulfilled",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "InformCustomerService"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "ESCALATED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "StoreFulfilment",
+            "description": "Store Fulfilment",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "AWAITING_WAVE"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.ScheduleFulfilmentExpiry",
+                    "props": {
+                        "eventName": "FulfilmentExpiry"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PROCESSING"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "FulfilmentExpiry",
+            "description": "Initiate Fulfilment Expiry",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "EXPIRED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commongi.RejectFulfilment",
+                    "props": null
+                },
+                {
+                    "name": "SSTOPDEV.commongi.SendEventToUpdateInventoryQuantity",
+                    "props": {
+                        "eventName": "UpdateInventoryQty",
+                        "operation": "UNRESERVE",
+                        "retailerId": "3",
+                        "inventoryCatalogueRef": "DEFAULT:3"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForOrder",
+                    "props": {
+                        "eventName": "FindAndCreateOrderFulfilment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_WAVE"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "WaveCreate",
+            "description": "CREATE WAVE",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "ASSIGNED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForOrder",
+                    "props": {
+                        "eventName": "FulfilmentAssigned"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_WAVE"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "FulfilmentAssigned",
+            "description": "Send event to order to notify that fulfilment is assigned",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "PICK_PACK"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "WavePack",
+            "description": "WavePack",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ConfirmFulfilmentItems",
+                    "props": null
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "VerifyFulfilmentItems"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "ASSIGNED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "VerifyFulfilmentItems",
+            "description": "Verify Fulfilment Items",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.VerifyingFulfilmentItems",
+                    "props": {
+                        "quantity": "ALL",
+                        "eventName": "AllFulfilled"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.VerifyingFulfilmentItems",
+                    "props": {
+                        "quantity": "PARTIAL",
+                        "eventName": "PartiallyFulfilled"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.VerifyingFulfilmentItems",
+                    "props": {
+                        "quantity": "NONE",
+                        "eventName": "AllRejected"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "ASSIGNED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "AllFulfilled",
+            "description": "Fulfilment is Fulfilled from Store or DC",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "FULFILLED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commongi.SendEventToUpdateInventoryQuantity",
+                    "props": {
+                        "eventName": "UpdateInventoryQty",
+                        "operation": "RESET_RESERVE",
+                        "retailerId": "3",
+                        "inventoryCatalogueRef": "DEFAULT:3"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "ASSIGNED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "PartiallyFulfilled",
+            "description": "Fulfilment Partially Fulfilled from the Store",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "PARTIALLY_FULFILLED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commongi.SendEventToUpdateInventoryQuantity",
+                    "props": {
+                        "eventName": "UpdateInventoryQty",
+                        "operation": "RESET_RESERVE",
+                        "retailerId": "3",
+                        "inventoryCatalogueRef": "DEFAULT:3"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForOrder",
+                    "props": {
+                        "eventName": "FindAndCreateOrderFulfilment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "ASSIGNED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "AllRejected",
+            "description": "Entire Fulfilment is Rejected from the store",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "REJECTED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commongi.SendEventToUpdateInventoryQuantity",
+                    "props": {
+                        "eventName": "UpdateInventoryQty",
+                        "operation": "RESET_RESERVE",
+                        "retailerId": "3",
+                        "inventoryCatalogueRef": "DEFAULT:3"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForOrder",
+                    "props": {
+                        "eventName": "FindAndCreateOrderFulfilment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "ASSIGNED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "WaveDispatchInitiated",
+            "description": "Wave Dispatch initiated: this ruleset is to create articles as per user edition in Service Point Pack screen",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.CreateArticlesForFulfilment",
+                    "props": {}
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "FULFILLED"
+                },
+                {
+                    "status": "PARTIALLY_FULFILLED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CREATE",
+            "description": "Change Article state",
+            "type": "ARTICLE",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "PENDING_CONSIGNMENT"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.CopyAttributesFromFulfilmentToArticle",
+                    "props": {}
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForFulfilmentV2",
+                    "props": {
+                        "eventName": "ArticleCreated"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ArticleCreated",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingAllArticleStates",
+                    "props": {
+                        "status": [
+                            "PENDING_CONSIGNMENT"
+                        ],
+                        "eventName": "CreateConsignment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "FULFILLED"
+                },
+                {
+                    "status": "PARTIALLY_FULFILLED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CreateConsignment",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.CreateDemoConsignment",
+                    "props": {
+                        "labelUrl": "DEMO_UK_RoyalMail_Label.pdf",
+                        "carrierRef": "DEFAULT_CARRIER:3"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "FULFILLED"
+                },
+                {
+                    "status": "PARTIALLY_FULFILLED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "CREATE",
+            "description": "CREATE",
+            "type": "CONSIGNMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "PROCESSING"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventGQL",
+                    "props": {
+                        "eventName": "ProcessConsignment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ProcessConsignment",
+            "description": "Process Consignment",
+            "type": "CONSIGNMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingConsignmentV2",
+                    "props": {
+                        "eventName": "ConsignmentBooked",
+                        "BookingStatus": "LODGED"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PROCESSING"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ConsignmentBooked",
+            "description": "ConsignmentBooked",
+            "type": "CONSIGNMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "ACTIVE_LODGED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForArticlesV2",
+                    "props": {
+                        "eventName": "ConsignmentFinalised"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PROCESSING"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ConsignmentFinalised",
+            "description": "Consignment has been finalised. Mark the article as ready for courier collection.",
+            "type": "ARTICLE",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "AWAITING_COURIER_COLLECTION"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForFulfilmentV2",
+                    "props": {
+                        "eventName": "ArticleAwaitingCourierCollection"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PENDING_CONSIGNMENT"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ArticleAwaitingCourierCollection",
+            "description": "Send event to fulfilment upon article collection",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingAllArticleStates",
+                    "props": {
+                        "status": [
+                            "AWAITING_COURIER_COLLECTION"
+                        ],
+                        "eventName": "AllArticlesAwaitingCourierCollection"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "FULFILLED"
+                },
+                {
+                    "status": "PARTIALLY_FULFILLED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "AllArticlesAwaitingCourierCollection",
+            "description": "Fulfilment State Change to AWAITING_COURIER_COLLECTION",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "AWAITING_COURIER_COLLECTION"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForOrder",
+                    "props": {
+                        "eventName": "FulfilmentAwaitingCourierCollection"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "FULFILLED"
+                },
+                {
+                    "status": "PARTIALLY_FULFILLED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "FulfilmentAwaitingCourierCollection",
+            "description": "FulfilmentAwaitingCollection",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingAllFulfilmentStates",
+                    "props": {
+                        "status": [
+                            "AWAITING_COURIER_COLLECTION",
+                            "REJECTED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ],
+                        "eventName": "OrderAwaitingCourierCollection"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "OrderAwaitingCourierCollection",
+            "description": "OrderAwaitingCollection",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "AWAITING_COURIER_COLLECTION"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ARTICLE_COLLECTED",
+            "description": "Courier Collection",
+            "type": "ARTICLE",
+            "subtype": "DEFAULT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "COLLECTED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForFulfilmentV2",
+                    "props": {
+                        "eventName": "ArticleCollected"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_COURIER_COLLECTION"
+                }
+            ],
+            "userActions": [
+                {
+                    "eventName": "ARTICLE_COLLECTED",
+                    "context": [
+                        {
+                            "label": "COLLECT",
+                            "type": "PRIMARY",
+                            "modules": [
+                                "servicepoint"
+                            ],
+                            "confirm": false
+                        }
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        {
+            "name": "ArticleCollected",
+            "description": "Send event to fulfilment upon article customer collection",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingAllArticleStates",
+                    "props": {
+                        "status": [
+                            "COLLECTED"
+                        ],
+                        "eventName": "AllArticlesCollected"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_COURIER_COLLECTION"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "AllArticlesCollected",
+            "description": "Fulfilment State Change from AWAITING_COURIER_COLLECTION to Complete and send event to Order",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "COMPLETE"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForOrder",
+                    "props": {
+                        "eventName": "CheckIfOrderIsComplete"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_COURIER_COLLECTION"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "ArticleCancellation",
+            "description": "Move Article from Awaiting Collection Aged to Cancelled when collection point Cancels the Article. Notify fulfilment about Article Cancellation",
+            "type": "ARTICLE",
+            "subtype": "DEFAULT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "CANCELLED"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_COURIER_COLLECTION"
+                }
+            ],
+            "userActions": [
+                {
+                    "eventName": "ArticleCancellation",
+                    "context": [
+                        {
+                            "label": "MARK AS CANCEL",
+                            "type": "PRIMARY",
+                            "modules": [
+                                "servicepoint"
+                            ],
+                            "confirm": true
+                        }
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        {
+            "name": "CheckIfOrderIsComplete",
+            "description": "Check if all fulfillments are complete",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventOnVerifyingAllFulfilmentStates",
+                    "props": {
+                        "status": [
+                            "COMPLETE",
+                            "REJECTED",
+                            "EXPIRED",
+                            "ESCALATED"
+                        ],
+                        "eventName": "OrderComplete"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_COURIER_COLLECTION"
+                },
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "OrderComplete",
+            "description": "Order Complete",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "COMPLETE"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "AWAITING_COURIER_COLLECTION"
+                },
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "PICK_PACK"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "OrderCancel",
+            "description": "Order is Cancelled from admin console",
+            "type": "ORDER",
+            "subtype": "HD",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.ChangeStateGQL",
+                    "props": {
+                        "status": "CANCELLED"
+                    }
+                },
+                {
+                    "name": "SSTOPDEV.commonv2.SendEventForAllFulfilments",
+                    "props": {
+                        "eventName": "CancelFulfilment"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                },
+                {
+                    "status": "RECEIVED"
+                },
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": [
+                {
+                    "context": [
+                        {
+                            "label": "CANCEL ORDER",
+                            "type": "PRIMARY",
+                            "modules": [
+                                "adminconsole"
+                            ],
+                            "confirm": true
+                        }
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        {
+            "name": "CancelFulfilment",
+            "description": "Cancel all the fulfillments when the order is cancelled in admin console",
+            "type": "FULFILMENT",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.CancelFulfilment",
+                    "props": null
+                },
+                {
+                    "name": "SSTOPDEV.commongi.SendEventToUpdateInventoryQuantity",
+                    "props": {
+                        "eventName": "UpdateInventoryQty",
+                        "operation": "UNRESERVE",
+                        "retailerId": "3",
+                        "inventoryCatalogueRef": "DEFAULT:3"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                },
+                {
+                    "status": "PROCESSING"
+                },
+                {
+                    "status": "AWAITING_WAVE"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "PAYMENT_TRANSACTION",
+            "type": "ORDER",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.commonv2.CreateFinancialTransaction",
+                    "props": {}
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "CREATED"
+                },
+                {
+                    "status": "BOOKED"
+                },
+                {
+                    "status": "RECEIVED"
+                }
+            ],
+            "userActions": []
+        },
+        {
+            "name": "FilterLocationsByType",
+            "description": "filters locations for the given type",
+            "type": "ORDER",
+            "subtype": "HD",
+            "eventType": "NORMAL",
+            "rules": [
+                {
+                    "name": "SSTOPDEV.base.FilterLocationsByType",
+                    "props": {
+                        "eventName": "CalculateLocationsDistances",
+                        "expressDeliveryValue": "WAREHOUSE"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "status": "BOOKED"
+                }
+            ],
+            "userActions": []
+        }
+    ],
+    "statuses": [
+        {
+            "name": "CREATED",
+            "entityType": "ORDER",
+            "category": "BOOKING"
+        },
+        {
+            "name": "RECEIVED",
+            "entityType": "ORDER",
+            "category": "BOOKING"
+        },
+        {
+            "name": "BOOKED",
+            "entityType": "ORDER",
+            "category": "BOOKING"
+        },
+        {
+            "name": "PICK_PACK",
+            "entityType": "ORDER",
+            "category": "FULFILMENT"
+        },
+        {
+            "name": "AWAITING_COURIER_COLLECTION",
+            "entityType": "ORDER",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "ESCALATED",
+            "entityType": "ORDER",
+            "category": "DONE"
+        },
+        {
+            "name": "CANCELLED",
+            "entityType": "ORDER",
+            "category": "DONE"
+        },
+        {
+            "name": "COMPLETE",
+            "entityType": "ORDER",
+            "category": "DONE"
+        },
+        {
+            "name": "CREATED",
+            "entityType": "FULFILMENT",
+            "category": "BOOKING"
+        },
+        {
+            "name": "PROCESSING",
+            "entityType": "FULFILMENT",
+            "category": "BOOKING"
+        },
+        {
+            "name": "AWAITING_WAVE",
+            "entityType": "FULFILMENT",
+            "category": "BOOKING"
+        },
+        {
+            "name": "ASSIGNED",
+            "entityType": "FULFILMENT",
+            "category": "FULFILMENT"
+        },
+        {
+            "name": "REJECTED",
+            "entityType": "FULFILMENT",
+            "category": "FULFILMENT"
+        },
+        {
+            "name": "FULFILLED",
+            "entityType": "FULFILMENT",
+            "category": "FULFILMENT"
+        },
+        {
+            "name": "PARTIALLY_FULFILLED",
+            "entityType": "FULFILMENT",
+            "category": "FULFILMENT"
+        },
+        {
+            "name": "AWAITING_COURIER_COLLECTION",
+            "entityType": "FULFILMENT",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "EXPIRED",
+            "entityType": "FULFILMENT",
+            "category": "DONE"
+        },
+        {
+            "name": "COMPLETE",
+            "entityType": "FULFILMENT",
+            "category": "DONE"
+        },
+        {
+            "name": "ESCALATED",
+            "entityType": "FULFILMENT",
+            "category": "DONE"
+        },
+        {
+            "name": "CREATED",
+            "entityType": "ARTICLE",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "PENDING_CONSIGNMENT",
+            "entityType": "ARTICLE",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "AWAITING_COURIER_COLLECTION",
+            "entityType": "ARTICLE",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "CANCELLED",
+            "entityType": "ARTICLE",
+            "category": "DONE"
+        },
+        {
+            "name": "COLLECTED",
+            "entityType": "ARTICLE",
+            "category": "DONE"
+        },
+        {
+            "name": "CREATED",
+            "entityType": "CONSIGNMENT",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "PROCESSING",
+            "entityType": "CONSIGNMENT",
+            "category": "DELIVERY"
+        },
+        {
+            "name": "ACTIVE_LODGED",
+            "entityType": "CONSIGNMENT",
+            "category": "DONE"
+        }
+    ]
+}

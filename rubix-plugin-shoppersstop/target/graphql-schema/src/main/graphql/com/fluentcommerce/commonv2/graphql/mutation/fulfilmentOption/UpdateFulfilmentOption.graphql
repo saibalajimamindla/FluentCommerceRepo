@@ -1,0 +1,13 @@
+mutation UpdateFulfilmentOption($input: UpdateFulfilmentOptionInput) {
+    updateFulfilmentOption(input: $input) {
+        id
+        ref
+        status
+        trackingCode
+        attributes {
+            type
+            name
+            value
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "SSTOPDEV": {
+      "schemaPath": "src/main/graphql/com.fluentcommerce/schema.json",
+      "extensions": {
+        "endpoints": {
+          "sandbox": {
+            "url": "https://SSTOPDEV.sandbox.api.fluentretail.com/graphql",
+            "headers": {
+              "Authorization": "Bearer ${env:AUTH_TOKEN_ENV}"
+            }
+          }
+        }
+      }
+    }
+  }
+}

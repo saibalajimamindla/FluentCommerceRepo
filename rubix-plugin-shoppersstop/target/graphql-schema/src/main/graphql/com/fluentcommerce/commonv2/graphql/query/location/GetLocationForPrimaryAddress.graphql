@@ -1,0 +1,13 @@
+query GetLocationForPrimaryAddress($locationRef: [String]) {
+  locations(ref: $locationRef) {
+    edges {
+      node {
+        ref
+        primaryAddress {
+          id
+          ref
+        }
+      }
+    }
+  }
+}

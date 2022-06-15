@@ -1,0 +1,14 @@
+query GetVariantProductByRef($productRef: String!, $catalogueRef: String!) {
+    variantProduct(ref: $productRef, catalogue: {ref: $catalogueRef}) {
+        ref
+        name
+        status
+        type
+        gtin
+        attributes {
+            name
+            type
+            value
+        }
+    }
+}

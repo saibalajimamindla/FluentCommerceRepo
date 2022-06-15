@@ -1,0 +1,6 @@
+mutation createWave($input: CreateWaveInput) {
+    createWave(input: $input) {
+        id
+        ref
+    }
+}

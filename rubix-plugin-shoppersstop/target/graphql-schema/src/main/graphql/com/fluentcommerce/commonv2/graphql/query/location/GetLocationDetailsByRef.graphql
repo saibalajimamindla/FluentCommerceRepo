@@ -1,0 +1,53 @@
+query GetLocationDetailsByRef($locationRef: [String]) {
+    locations(ref: $locationRef) {
+        edges {
+            node {
+                id
+                ref
+                type
+                status
+                name
+                primaryAddress {
+                    ref
+                    type
+                    companyName
+                    name
+                    street
+                    city
+                    state
+                    postcode
+                    region
+                    country
+                    latitude
+                    longitude
+                    timeZone
+                }
+                attributes {
+                    type
+                    name
+                    value
+                }
+                openingSchedule {
+                    id
+                    createdOn
+                    updatedOn
+                    allHours
+                    monEnd
+                    monStart
+                    tueEnd
+                    tueStart
+                    wedEnd
+                    wedStart
+                    thuEnd
+                    thuStart
+                    friEnd
+                    friStart
+                    satEnd
+                    satStart
+                    sunEnd
+                    sunStart
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,36 @@
+query GetConsignmentsByFulfilmentId($fulfilmentId: ID!) {
+    fulfilmentById(id: $fulfilmentId) {
+        order {
+            id
+            ref
+        }
+        articles {
+            edges {
+                node {
+                    consignmentArticles {
+                        edges {
+                            node {
+                                consignment {
+                                    id
+                                    ref
+                                    status
+                                    trackingLabel
+                                    labelUrl
+                                    carrier {
+                                        id
+                                        name
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        attributes {
+            name
+            type
+            value
+        }
+    }
+}

@@ -1,0 +1,37 @@
+query GetUserByUsername($username: [String!]) {
+    users(username: $username) {
+        edges {
+            node {
+                id
+                username
+                status
+                type
+                title
+                firstName
+                lastName
+                primaryEmail
+                primaryPhone
+                attributes {
+                    name
+                    value
+                    type
+                }
+                department
+                country
+                timezone
+                language {
+                    value
+                    label
+                }
+                promotionOptIn
+                primaryRetailer {
+                    id
+                }
+                primaryLocation {
+                    id
+                    ref
+                }
+            }
+        }
+    }
+}

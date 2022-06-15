@@ -1,0 +1,93 @@
+query GetWaveById($id: ID!, $includeAttributes: Boolean!, $includeLocation: Boolean!, $includefulfilments: Boolean!, $includeArticles: Boolean!, $fulfilmentItemsCount: Int, $fulfilmentItemsCursor: String, $articlesCount: Int, $articlesCursor: String) {
+    waveById(id: $id) {
+        ref
+        name
+        status
+        type
+        attributes @include(if: $includeAttributes) {
+            name
+            value
+            type
+        }
+        location @include(if: $includeLocation) {
+            id
+            ref
+            status
+            name
+            defaultCarrier
+            defaultCarrierName
+            supportPhoneNumber
+            attributes {
+                name
+                type
+                value
+            }
+        }
+        fulfilments(first: $fulfilmentItemsCount, after: $fulfilmentItemsCursor) @include(if: $includefulfilments) {
+            edges {
+                node {
+                    id
+                    ref
+                    status
+                    order {
+                        id
+                        ref
+                    }
+                    fromAddress {
+                        id
+                        ref
+                        name
+                        country
+                        street
+                        city
+                        postcode
+                        state
+                        region
+                        companyName
+                    }
+                    toAddress {
+                        id
+                        ref
+                        name
+                        country
+                        street
+                        city
+                        postcode
+                        state
+                        region
+                        companyName
+                    }
+                    articles(first: $articlesCount, after: $articlesCursor) @include(if: $includeArticles) {
+                        edges {
+                            cursor
+                            node {
+                                id
+                                name
+                                type
+                                ref
+                                description
+                                quantity
+                                length
+                                height
+                                weight
+                                width
+                                attributes {
+                                    name
+                                    type
+                                    value
+                                }
+                            }
+                        }
+                        pageInfo {
+                            hasNextPage
+                        }
+                    }
+                }
+                cursor
+            }
+            pageInfo {
+                hasNextPage
+            }
+        }
+    }
+}

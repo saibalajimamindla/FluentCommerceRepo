@@ -1,0 +1,16 @@
+query GetCarrierByRefs($carrierRefs: [String!]) {
+    carriers(ref: $carrierRefs) {
+        edges {
+            node {
+                id
+                name
+                type
+                ref
+                status
+                retailer {
+                    id
+                }
+            }
+        }
+    }
+}

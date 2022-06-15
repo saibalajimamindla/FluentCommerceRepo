@@ -1,0 +1,132 @@
+query getArticleByRef($ref: [String]) {
+    articles(ref: $ref) {
+        articleEdge:edges {
+            articleNode:node {
+                id
+                ref
+                type
+                status
+                attributes {
+                    name
+                    type
+                    value
+                }
+                description
+                height
+                length
+                name
+                weight
+                width
+                quantity
+                items {
+                    edges {
+                        node {
+                            id
+                            quantity
+                            barcode
+                            article {
+                                id
+                                ref
+                                type
+                                status
+                                attributes {
+                                    name
+                                    type
+                                    value
+                                }
+                                description
+                                height
+                                length
+                                name
+                                weight
+                                width
+                                quantity
+                            }
+                        }
+                    }
+                }
+                fulfilments {
+                    edges {
+                        node {
+                            id
+                            ref
+                            status
+                            createdOn
+                            updatedOn
+                            attributes {
+                                name
+                                type
+                                value
+                            }
+                            deliveryType
+                            type
+                            eta
+                            expiryTime
+                            order {
+                                id
+                                ref
+                                type
+                                status
+                                createdOn
+                                updatedOn
+                                attributes {
+                                    name
+                                    type
+                                    value
+                                }
+                            }
+                        }
+                    }
+                }
+                consignmentArticles {
+                    edges {
+                        node {
+                            consignment {
+                                id
+                                ref
+                                status
+                                consignmentReference
+                                trackingLabel
+                                labelUrl
+                                orderSummaryUrl
+                            }
+                        }
+                    }
+                }
+                carrierConsignmentArticles {
+                    edges {
+                        node {
+                            carrierConsignment {
+                                id
+                                ref
+                                status
+                                consignmentReference
+                                trackingLabel
+                                labelUrl
+                                orderSummaryUrl
+                                carrier {
+                                    id
+                                }
+                                retailer {
+                                    id
+                                }
+                                manifests {
+                                    edges {
+                                        node {
+                                            id
+                                        }
+                                    }
+                                }
+                                attributes {
+                                    name
+                                    type
+                                    value
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,21 @@
+$contentCatalog=croma_content_catalog
+$contentCatalogName=Croma Retail Shop Content Catalog
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+$productCatalog=electronicsProductCatalog
+$productCatalogName=Electronics Product Catalog
+$productCV=catalogVersion(catalog(id[default=$productCatalog]),version[default='Staged'])[unique=true,default=$productCatalog:Staged]
+$media=media(code, $contentCV);
+$product=product(code, $productCV)
+$category=category(code, $productCV)
+$siteResource=jar:com.croma.web.initialdata.setup.InitialDataSystemSetup&/cromainitialdata/import/sampledata/contentCatalogs/catalogName
+
+
+#UsefulLinks
+INSERT_UPDATE CMSLinkComponent ; $contentCV[unique=true] ; uid[unique=true]    		; name                   		; LinkName				;  url        																						; &linkRef         			; &componentRef    		 		 ; target(code)[default='sameWindow'] ; $category ; $product ;  
+					           ;                         ;PWAContactUsLink          ; PWA contact Us Link           ; Help And Support      ;/helpAndSupport																					;PWAContactUsLink			;PWAContactUsLink                ;                                    ;           ;          ;
+
+INSERT_UPDATE CMSNavigationEntry ; uid[unique=true]       	; $contentCV[unique=true] ; name                   	 	; item(CMSLinkComponent.uid,CMSLinkComponent.$contentCV) 
+                                 ; ContactUsEntry           ;                         ;Contact Us Entry				; PWAContactUsLink
+								 
+INSERT_UPDATE CMSNavigationNode ; uid[unique=true] ; $contentCV[unique=true] ; name     			 ; parent(uid, $contentCV) ; entries(uid,$contentCV)[mode=append] ;  
+                                ; USEFULLINKSNode  ;                         ; USEFUL LINKS Node 	 ;                         ; ContactUsEntry		                  ;  

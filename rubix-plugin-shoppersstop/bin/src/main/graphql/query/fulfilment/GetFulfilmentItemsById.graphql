@@ -1,0 +1,17 @@
+query GetFulfilmentItemsById($id:ID! $fulfilmentItemsCount:Int){
+    fulfilmentById(id:$id){
+        id
+        ref
+        items(first:$fulfilmentItemsCount){
+            edges{
+                node{
+                    ref
+                    id
+                    requestedQuantity
+                    filledQuantity
+                    rejectedQuantity
+                }
+            }
+        }
+    }
+}

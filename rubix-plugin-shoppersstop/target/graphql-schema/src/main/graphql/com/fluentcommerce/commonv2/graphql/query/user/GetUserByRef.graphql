@@ -1,0 +1,14 @@
+query GetUserByRef($username: String!){
+  user(username:$username){
+    id
+    ref
+    status
+    type
+    title
+    firstName
+    lastName
+    username
+    primaryEmail
+    primaryPhone
+  }
+}

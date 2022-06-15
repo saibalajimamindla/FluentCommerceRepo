@@ -1,0 +1,23 @@
+query getWaveForFulfilment($processingLocation: String!, $waveStatus: [String], $fulfilentRef: [String]) {
+    waves(processingLocation: {ref: $processingLocation}, status: $waveStatus) {
+        edges {
+            node {
+                id
+                ref
+                status
+                type
+                retailer {
+                    id
+                }
+                fulfilments(ref: $fulfilentRef) {
+                    edges {
+                        node {
+                            id
+                            ref
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

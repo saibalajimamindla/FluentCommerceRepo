@@ -1,0 +1,20 @@
+query GetFulfilmentsByOrderId($id: ID!) {
+    orderById(id: $id) {
+        id
+        fulfilments {
+            edges {
+                node {
+                    id
+                    items {
+                        edges {
+                            node {
+                                id
+                                requestedQuantity
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+query GetFulfilmentPlanIdByRef($ref: [String!]) {
+    fulfilmentPlans(ref:$ref){
+        fulfilmentPlanEdge:edges{
+            fulfilmentPlanNode:node{
+                id
+            }
+        }
+    }
+}

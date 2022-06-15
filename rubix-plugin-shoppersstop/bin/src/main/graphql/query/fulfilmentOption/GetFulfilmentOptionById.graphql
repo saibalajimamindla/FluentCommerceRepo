@@ -1,0 +1,61 @@
+query GetFulfilmentOptionById($id: ID!,
+    $includeAttributes:Boolean!,
+    $includeAddress:Boolean!,
+    $includeProducts:Boolean!,
+    $includePlans:Boolean!,
+    $plansCount:Int,
+    $plansCursor:String) {
+    fulfilmentOptionById(id: $id) {
+        id
+        ref
+        type
+        status
+        createdOn
+        updatedOn
+        retailerId
+        orderType
+        locationRef
+        trackingCode
+        attributes @include(if:$includeAttributes){
+            name
+            type
+            value
+        }
+        address @include(if:$includeAddress){
+            name
+            companyName
+            addressLine1
+            addressLine2
+            city
+            state
+            postcode
+            country
+            longitude
+            latitude
+        }
+        products @include(if:$includeProducts){
+            productRef
+            catalogueRef
+            requestedQuantity
+        }
+        plans (first: $plansCount, after: $plansCursor)  @include(if:$includePlans){
+            plansEdge:edges {
+                plan:node {
+                    type
+                    id
+                    status
+                    fulfilments{
+                        fulfilmentType
+                        locationRef
+                        items {
+                            productRef
+                            catalogueRef
+                            availableQuantity
+                            requestedQuantity
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

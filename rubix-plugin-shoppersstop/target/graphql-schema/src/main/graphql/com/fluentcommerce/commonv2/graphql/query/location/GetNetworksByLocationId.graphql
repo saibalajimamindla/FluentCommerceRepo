@@ -1,0 +1,11 @@
+query GetNetworksByLocationId($id: ID!) {
+    locationById(id: $id){
+        networks{
+            edges {
+                node {
+                    ref
+                }
+            }
+        }
+    }
+}

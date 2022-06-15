@@ -1,0 +1,67 @@
+package com.fluentcommerce.rule.location;
+
+import com.fluentcommerce.common.BaseRule;
+import com.fluentcommerce.common.ContextWrapper;
+import com.fluentcommerce.model.location.Location;
+import com.fluentcommerce.service.LocationService;
+import com.fluentcommerce.util.EventUtils;
+import com.fluentcommerce.util.RuleUtils;
+import com.fluentretail.rubix.rule.meta.EventInfo;
+import com.fluentretail.rubix.rule.meta.ParamString;
+import com.fluentretail.rubix.rule.meta.RuleInfo;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.fluentcommerce.util.Constants.EntityType.ENTITY_TYPE_FULFILMENT_OPTIONS;
+import static com.fluentcommerce.util.Constants.EntityType.ENTITY_TYPE_ORDER;
+import static com.fluentcommerce.util.Constants.EventField.EVENT_FIELD_LOCATIONS;
+import static com.fluentcommerce.util.Constants.PropertyField.*;
+
+/**
+ * @author Holger
+ */
+@RuleInfo(
+    name = "GetLocationsForNetwork",
+    description = "Retrieves the locations in network {" + PROP_NETWORK_REF + "} which are in status {"
+        + PROP_LOCATION_STATUSES + "}. Sends event {" + PROP_EVENT_NAME + "}.",
+    accepts = {
+        @EventInfo(entityType = ENTITY_TYPE_FULFILMENT_OPTIONS),
+        @EventInfo(entityType = ENTITY_TYPE_ORDER)
+    }
+)
+
+@ParamString(name = PROP_EVENT_NAME, description = "The event name triggered by this rule")
+@ParamString(name = PROP_LOCATION_STATUSES, description = "The location statuses which will be considered")
+@ParamString(name = PROP_NETWORK_REF, description = "The network ref for which the locations will be retrieved.")
+@Slf4j
+public class GetLocationsForNetwork extends BaseRule {
+
+    private static final String CLASS_NAME = GetLocationsForNetwork.class.getSimpleName();
+
+    @Override
+    public void execute(ContextWrapper context) {
+
+        final String logPrefix = RuleUtils.buildLogPrefix(CLASS_NAME, context.getEvent());
+        log.info(logPrefix + " - Incoming event :{}", context.getEvent());
+
+        final String eventName = context.getProp(PROP_EVENT_NAME);
+        final String networkRef = context.getProp(PROP_NETWORK_REF);
+        List<String> locationStatuses = context.getPropList(PROP_LOCATION_STATUSES, String.class);
+
+        Map<String, Location> networkLocations = new HashMap<>();
+        LocationService locationService = new LocationService(context);
+        List<Location> locations = locationService.loadLocationsForNetwork(networkRef, locationStatuses);
+        for (Location location : locations) {
+            networkLocations.put(location.getRef(), location);
+        }
+        log.info(logPrefix + " - found:{} locations for network: {} in status:{}", networkLocations, networkRef, locationStatuses);
+
+        Map<String, Object> attributes = context.getEvent().getAttributes();
+        attributes.put(EVENT_FIELD_LOCATIONS, networkLocations);
+        //hard-coded to an inline event until the Rubix bug is fixed
+        EventUtils.forwardInlineEventWithAttributes(context, eventName, attributes);
+    }
+}
