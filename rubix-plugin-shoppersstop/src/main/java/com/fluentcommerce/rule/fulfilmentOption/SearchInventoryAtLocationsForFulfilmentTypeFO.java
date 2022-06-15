@@ -96,9 +96,10 @@ public class SearchInventoryAtLocationsForFulfilmentTypeFO extends BaseRule {
 
         Map<String, Object> attributes = context.getEvent().getAttributes();
         attributes.put(EVENT_FIELD_VIRTUAL_POSITIONS, EDVirtualPositions);
-        if (!SDVirtualPositions.isEmpty())
+        if (SDVirtualPositionsFiltered.isEmpty())
         {
             attributes.put(SD_EVENT_FIELD_VIRTUAL_POSITIONS, SDVirtualPositions);
+
         }else {
             attributes.put(SD_EVENT_FIELD_VIRTUAL_POSITIONS, SDVirtualPositionsFiltered);
         }

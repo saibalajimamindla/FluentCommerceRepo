@@ -83,12 +83,6 @@ public class SelectRatedFulfilmentPlanAndTypeSdFO extends BaseRule {
         List<Product> products =
                 context.getEvent().getAttributeList(EVENT_FIELD_PRODUCTS, Product.class);
 
-//        Map<String, Product> productsEventMap = convertObjectToDto(
-//                context.getEvent().getAttribute(EVENT_FIELD_PRODUCTS, Map.class),
-//                new TypeReference<Map<String, Product>>() {
-//                }
-//        );
-
         //START: Should be moved into rule: RateProposedFulfilments
         Map<String, Integer> productsMap = new HashMap<>();
         for (Product product : products) {
@@ -198,7 +192,7 @@ public class SelectRatedFulfilmentPlanAndTypeSdFO extends BaseRule {
         List<FulfilmentPlan> fulfilmentPlanList = Arrays.asList(fulfilmentPlanBuilder.build());
 
         Map<String, Object> attributes = context.getEvent().getAttributes();
-        List<FulfilmentPlan> existingFulfilmentPlans = context.getEvent().getAttribute(EVENT_FIELD_FULFILMENT_PLANS, List.class);
+        List<FulfilmentPlan> existingFulfilmentPlans = context.getEvent().getAttribute(SD_EVENT_FIELD_FULFILMENT_PLANS, List.class);
         if(existingFulfilmentPlans != null && existingFulfilmentPlans.size() > 0) {
             fulfilmentPlanList = ListUtils.union(existingFulfilmentPlans, fulfilmentPlanList);
         }

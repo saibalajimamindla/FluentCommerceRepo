@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1655232653212
+Bnd-LastModified: 1655310825820
 Build-Jdk: 1.8.0_144
 Built-By: tech
 Bundle-ManifestVersion: 2
 Bundle-Name: rubix-plugin-shoppersstop
 Bundle-SymbolicName: SSTOPDEV.base
 Bundle-Vendor: Fluent Commerce
-Bundle-Version: 1.0.35
+Bundle-Version: 1.0.44
 Created-By: Apache Maven Bundle Plugin
 Embed-Dependency: *;scope=compile|runtime;inline=true
 Embed-Transitive: true

@@ -53,6 +53,8 @@ import static com.fluentcommerce.util.LocationUtils.getNearestLocationDistance;
 @ParamString(name = PROP_EVENT_NAME, description = "The event name triggered by this rule")
 @EventAttribute(name = EVENT_FIELD_PROPOSED_FULFILMENTS)
 @EventAttribute(name = EVENT_FIELD_LOCATIONS)
+@EventAttribute(name = SD_EVENT_FIELD_PROPOSED_FULFILMENTS)
+@EventAttribute(name = SD_EVENT_FIELD_LOCATIONS)
 @EventAttribute(name = EVENT_FIELD_PRODUCTS)
 @Slf4j
 public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
@@ -61,7 +63,7 @@ public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
     private static Boolean ED_flag = false;
     private static Boolean SD_flag = false;
 
-    private  String fulfilmentType = null;
+    private String fulfilmentType = null;
 
     @Override
     public void execute(ContextWrapper context) {
@@ -72,14 +74,24 @@ public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
 
         Map<String, ProposedFulfilment> proposedFulfilments = convertObjectToDto(
                 context.getEvent().getAttribute(EVENT_FIELD_PROPOSED_FULFILMENTS, Map.class),
-                new TypeReference<Map<String, ProposedFulfilment>>() {}
+                new TypeReference<Map<String, ProposedFulfilment>>() {
+                }
         );
         Map<String, Location> locationsMap = convertObjectToDto(
                 context.getEvent().getAttribute(EVENT_FIELD_LOCATIONS, Map.class),
                 new TypeReference<Map<String, Location>>() {
                 }
         );
-
+        Map<String, ProposedFulfilment> sdProposedFulfilments = convertObjectToDto(
+                context.getEvent().getAttribute(SD_EVENT_FIELD_PROPOSED_FULFILMENTS, Map.class),
+                new TypeReference<Map<String, ProposedFulfilment>>() {
+                }
+        );
+        Map<String, Location> sdLocationsMap = convertObjectToDto(
+                context.getEvent().getAttribute(SD_EVENT_FIELD_LOCATIONS, Map.class),
+                new TypeReference<Map<String, Location>>() {
+                }
+        );
         List<Product> products =
                 context.getEvent().getAttributeList(EVENT_FIELD_PRODUCTS, Product.class);
 
@@ -88,6 +100,8 @@ public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
         for (Product product : products) {
             productsMap.put(product.getProductRef(), product.getRequestedQuantity());
         }
+
+
         final Double nearestLocationDistance = getNearestLocationDistance(locationsMap.values());
         final Map<FulfilmentRating, ProposedFulfilment> ratedProposedFulfilmentsMap = getRatedProposedFulfilments(
                 context,
@@ -96,14 +110,28 @@ public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
                 locationsMap,
                 nearestLocationDistance
         );
+
+        final Double sdNearestLocationDistance = getNearestLocationDistance(sdLocationsMap.values());
+        final Map<FulfilmentRating, ProposedFulfilment> sdRatedProposedFulfilmentsMap = getRatedProposedFulfilments(
+                context,
+                sdProposedFulfilments,
+                productsMap,
+                sdLocationsMap,
+                sdNearestLocationDistance
+        );
         //END
 
         Map<String, Product> remainingProducts = new HashMap<>();
-        for(Product product : products){
+        for (Product product : products) {
             remainingProducts.put(product.getProductRef(), product);
+        }
+        Map<String, Product> sdRemainingProducts = new HashMap<>();
+        for (Product product : products) {
+            sdRemainingProducts.put(product.getProductRef(), product);
         }
 
         List<FulfilmentPlanFulfilment> fulfilmentPlanFulfilmentList = new ArrayList<>();
+        List<FulfilmentPlanFulfilment> sdFulfilmentPlanFulfilmentList = new ArrayList<>();
 
         for (ProposedFulfilment ratedProposedFulfilment : ratedProposedFulfilmentsMap.values()) {
             List<FulfilmentPlanFulfilmentItem> fulfilmentPlanFulfilmentItemList = new ArrayList<>();
@@ -137,28 +165,24 @@ public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
             GetLocationByRefQuery.Location location = locationService.getLocationByRefOrFail(locationref);
             GetNetworksByLocationIdQuery query = GetNetworksByLocationIdQuery.builder().id(location.id()).build();
             GetNetworksByLocationIdQuery.Data Result = (GetNetworksByLocationIdQuery.Data) context.api().query(query);
-            if (Result.locationById().networks()!= null && Result.locationById().networks().edges()!=null )
-            {
-                for (GetNetworksByLocationIdQuery.Edge edge :Result.locationById().networks().edges()) {
-                    if(edge.node().ref()!=null) {
-                        if (edge.node().ref().contains("_ED"))
-                        {
+            if (Result.locationById().networks() != null && Result.locationById().networks().edges() != null) {
+                for (GetNetworksByLocationIdQuery.Edge edge : Result.locationById().networks().edges()) {
+                    if (edge.node().ref() != null) {
+                        if (edge.node().ref().contains("_ED")) {
                             ED_flag = true;
-                        }else if (edge.node().ref().contains("_SD")) {
-                            SD_flag=true;
+                        } else if (edge.node().ref().contains("_SD")) {
+                            SD_flag = true;
                         }
                     }
 
                 }
 
-                if (ED_flag && SD_flag)
-                {
-                    fulfilmentType="BOTH";
-                }else if(ED_flag)
-                {
-                    fulfilmentType="ED";
-                }else {
-                    fulfilmentType="SD";
+                if (ED_flag && SD_flag) {
+                    fulfilmentType = "ED";
+                } else if (ED_flag) {
+                    fulfilmentType = "ED";
+                } else {
+                    fulfilmentType = "SD";
                 }
                 ED_flag = false;
                 SD_flag = false;
@@ -174,29 +198,119 @@ public class SelectRatedFulfilmentPlanAndTypeEdFO extends BaseRule {
                         .build();
                 fulfilmentPlanFulfilmentList.add(fulfilmentPlanFulfilment);
             }
-            if (MapUtils.isEmpty(remainingProducts)){
+            if (MapUtils.isEmpty(remainingProducts)) {
                 break;
             }
         }
 
-        //consider to move into a separate rule
-        FulfilmentPlan.Builder fulfilmentPlanBuilder = FulfilmentPlan.builder()
-                .fulfilments(fulfilmentPlanFulfilmentList);
-        if (MapUtils.isEmpty(remainingProducts)) {
-            fulfilmentPlanBuilder.status(STATUS_FULFILLED);
-        } else if (fulfilmentPlanFulfilmentList.size() > 0) {
-            fulfilmentPlanBuilder.status(STATUS_PARTIALLY_FULFILLED);
-        } else {
-            fulfilmentPlanBuilder.status(STATUS_REJECTED);
-        }
-        List<FulfilmentPlan> fulfilmentPlanList = Arrays.asList(fulfilmentPlanBuilder.build());
+        for (ProposedFulfilment ratedProposedFulfilment : sdRatedProposedFulfilmentsMap.values()) {
+            List<FulfilmentPlanFulfilmentItem> fulfilmentPlanFulfilmentItemList = new ArrayList<>();
+            List<VirtualPosition> virtualPositions = ratedProposedFulfilment.getVirtualPositions();
+            for (VirtualPosition virtualPosition : virtualPositions) {
+                String productRef = virtualPosition.getProductRef();
+                int availableQty = virtualPosition.getQuantity();
+                Product product = sdRemainingProducts.get(productRef);
+                if (product == null || availableQty == 0) {
+                    continue;
+                }
+                FulfilmentPlanFulfilmentItem.Builder fulfilmentPlanFulfilmentItem = FulfilmentPlanFulfilmentItem.builder()
+                        .availableQuantity(availableQty)
+                        .requestedQuantity(productsMap.get(product.getProductRef()))
+                        .productRef(product.getProductRef());
+                if (availableQty >= product.getRequestedQuantity()) {
+                    sdRemainingProducts.remove(productRef);
+                    fulfilmentPlanFulfilmentItemList.add(fulfilmentPlanFulfilmentItem.build());
+                } else if (availableQty > 0 && availableQty < product.getRequestedQuantity()) {
+                    Product currentProduct = sdRemainingProducts.get(productRef);
+                    int newRequestedQuantity = currentProduct.getRequestedQuantity() - virtualPosition.getQuantity();
+                    sdRemainingProducts.put(
+                            productRef,
+                            currentProduct.toBuilder().requestedQuantity(newRequestedQuantity).build()
+                    );
+                    fulfilmentPlanFulfilmentItemList.add(fulfilmentPlanFulfilmentItem.build());
+                }
+            }
+            String locationref = ratedProposedFulfilment.getLocationRef();
+            LocationService locationService = new LocationService(context);
+            GetLocationByRefQuery.Location location = locationService.getLocationByRefOrFail(locationref);
+            GetNetworksByLocationIdQuery query = GetNetworksByLocationIdQuery.builder().id(location.id()).build();
+            GetNetworksByLocationIdQuery.Data Result = (GetNetworksByLocationIdQuery.Data) context.api().query(query);
+            if (Result.locationById().networks() != null && Result.locationById().networks().edges() != null) {
+                for (GetNetworksByLocationIdQuery.Edge edge : Result.locationById().networks().edges()) {
+                    if (edge.node().ref() != null) {
+                        if (edge.node().ref().contains("_ED")) {
+                            ED_flag = true;
+                        } else if (edge.node().ref().contains("_SD")) {
+                            SD_flag = true;
+                        }
+                    }
 
-        Map<String, Object> attributes = context.getEvent().getAttributes();
-        List<FulfilmentPlan> existingFulfilmentPlans = context.getEvent().getAttribute(EVENT_FIELD_FULFILMENT_PLANS, List.class);
-        if(existingFulfilmentPlans != null && existingFulfilmentPlans.size() > 0) {
-            fulfilmentPlanList = ListUtils.union(existingFulfilmentPlans, fulfilmentPlanList);
+                }
+
+                if (ED_flag && SD_flag) {
+                    fulfilmentType = "ED";
+                } else if (ED_flag) {
+                    fulfilmentType = "ED";
+                } else {
+                    fulfilmentType = "SD";
+                }
+                ED_flag = false;
+                SD_flag = false;
+
+            }
+
+            if (fulfilmentPlanFulfilmentItemList.size() > 0) {
+                FulfilmentPlanFulfilment fulfilmentPlanFulfilment = FulfilmentPlanFulfilment.builder()
+                        .locationRef(ratedProposedFulfilment.getLocationRef())
+                        .items(fulfilmentPlanFulfilmentItemList)
+                        .distance(ratedProposedFulfilment.getDistance())
+                        .fulfilmentType(fulfilmentType)
+                        .build();
+                sdFulfilmentPlanFulfilmentList.add(fulfilmentPlanFulfilment);
+            }
+            if (MapUtils.isEmpty(sdRemainingProducts)) {
+                break;
+            }
+
         }
-        attributes.put(EVENT_FIELD_FULFILMENT_PLANS, fulfilmentPlanList);
-        EventUtils.forwardInlineEventWithAttributes(context, eventName, attributes);
+            //consider to move into a separate rule
+            FulfilmentPlan.Builder fulfilmentPlanBuilder = FulfilmentPlan.builder()
+                    .fulfilments(fulfilmentPlanFulfilmentList);
+            if (MapUtils.isEmpty(remainingProducts)) {
+                fulfilmentPlanBuilder.status(STATUS_FULFILLED);
+            } else if (fulfilmentPlanFulfilmentList.size() > 0) {
+                fulfilmentPlanBuilder.status(STATUS_PARTIALLY_FULFILLED);
+            } else {
+                fulfilmentPlanBuilder.status(STATUS_REJECTED);
+            }
+
+            FulfilmentPlan.Builder sdFulfilmentPlanBuilder = FulfilmentPlan.builder()
+                    .fulfilments(sdFulfilmentPlanFulfilmentList);
+
+            if (MapUtils.isEmpty(sdRemainingProducts)) {
+                sdFulfilmentPlanBuilder.status(STATUS_FULFILLED);
+            } else if (sdFulfilmentPlanFulfilmentList.size() > 0) {
+                sdFulfilmentPlanBuilder.status(STATUS_PARTIALLY_FULFILLED);
+            } else {
+                sdFulfilmentPlanBuilder.status(STATUS_REJECTED);
+            }
+
+            List<FulfilmentPlan> fulfilmentPlanList = Arrays.asList(fulfilmentPlanBuilder.build());
+            List<FulfilmentPlan> sdFulfilmentPlanList = Arrays.asList(sdFulfilmentPlanBuilder.build());
+
+            Map<String, Object> attributes = context.getEvent().getAttributes();
+            List<FulfilmentPlan> existingFulfilmentPlans = context.getEvent().getAttribute(EVENT_FIELD_FULFILMENT_PLANS, List.class);
+            List<FulfilmentPlan> sdExistingFulfilmentPlans = context.getEvent().getAttribute(SD_EVENT_FIELD_FULFILMENT_PLANS, List.class);
+            if (existingFulfilmentPlans != null && existingFulfilmentPlans.size() > 0) {
+                fulfilmentPlanList = ListUtils.union(existingFulfilmentPlans, fulfilmentPlanList);
+            }
+            if (sdExistingFulfilmentPlans != null && sdExistingFulfilmentPlans.size() > 0) {
+                sdFulfilmentPlanList = ListUtils.union(sdExistingFulfilmentPlans, sdFulfilmentPlanList);
+            }
+            attributes.put(EVENT_FIELD_FULFILMENT_PLANS, fulfilmentPlanList);
+            attributes.put(SD_EVENT_FIELD_FULFILMENT_PLANS, sdFulfilmentPlanList);
+            EventUtils.forwardInlineEventWithAttributes(context, eventName, attributes);
+        }
+
+
     }
-}

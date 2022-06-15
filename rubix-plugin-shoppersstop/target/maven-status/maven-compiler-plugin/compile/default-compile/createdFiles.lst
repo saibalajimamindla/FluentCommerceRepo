@@ -1933,6 +1933,7 @@ com\fluentcommerce\commonv2\graphql\query\carrier\GetCarrierByRefsQuery$Data$1.c
 com\fluentcommerce\commonv2\graphql\query\user\GetUserByUsernameQuery$Node$Mapper$1.class
 com\fluentcommerce\commonv2\graphql\type\UpdateFulfilmentPlanInput$Builder.class
 com\fluentcommerce\commonv2\graphql\type\VirtualCatalogueKey$1.class
+com\fluentcommerce\rule\fulfilmentOption\SelectRatedFulfilmentPlanAndTypeEdFO$3.class
 com\fluentcommerce\commonv2\graphql\type\CreateOpeningScheduleInput.class
 com\fluentcommerce\commonv2\graphql\query\location\GetLocationForPrimaryAddressQuery$1.class
 com\fluentcommerce\commonv2\graphql\query\wave\GetWaveByIdQuery$Variables.class
@@ -1981,6 +1982,7 @@ com\fluentcommerce\commonv2\graphql\query\order\GetOrderByIdQuery$AsVariantProdu
 com\fluentcommerce\commonv2\graphql\query\order\GetOrderByIdQuery$OrderItemNode$Builder.class
 com\fluentcommerce\commonv2\graphql\query\fulfilment\GetFulfilmentByIdQuery$FulfilmentById$Mapper$1$1.class
 com\fluentcommerce\commonv2\graphql\query\fulfilment\GetFulfilmentItemsByIdQuery$Items.class
+com\fluentcommerce\rule\fulfilmentOption\SelectRatedFulfilmentPlanAndTypeEdFO$4.class
 com\fluentcommerce\commonv2\graphql\query\order\GetOrderByIdQuery$FulfilmentAttribute.class
 com\fluentcommerce\commonv2\graphql\query\order\GetOrderByIdQuery$OrderById$Mapper$5.class
 com\fluentcommerce\commonv2\graphql\query\article\GetArticleByRefQuery$Variables$1$1.class
